@@ -2,14 +2,14 @@
 #load "Utils.fs"
 #load "Cell.fs"
 #load "Board.fs"
+#load "Game.fs"
 
 open Garnet.Composition
 open Game
 
 let world = Container()
 
-world |> CellSystem.register
-world |> BoardSystem.register
+world |> GameSystem.register
 
 let w, h = 30, 30
 

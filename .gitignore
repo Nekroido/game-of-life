@@ -1,3 +1,11 @@
+# Include .NET Tools configuration file
+!.config/dotnet-tools.json
+
+# Include Visual Studio Code configuration files
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+
 # Ignore build output directories
 bin/
 obj/
@@ -35,3 +43,6 @@ coverage/
 *.cache
 *.config
 *.bak
+
+# Ignore Ionide files
+.fake

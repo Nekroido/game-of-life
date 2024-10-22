@@ -1,0 +1,38 @@
+root = true
+
+[*.{fs,fsi,fsx}]
+# Core warnings
+dotnet_diagnostic.CA1822.severity = none
+
+max_line_length=90
+
+# Indentation settings
+indent_style = space
+indent_size = 4
+
+# End of line settings
+end_of_line = lf
+insert_final_newline = true
+
+# Code style settings
+dotnet_sort_system_directives_first = true
+dotnet_style_parentheses_in_multiline_expressions = true:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+
+# Naming conventions
+dotnet_naming_rule.private_members_rule.severity = suggestion
+dotnet_naming_rule.private_members_rule.symbols = private_fields
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.required_modifiers = readonly
+dotnet_naming_style.private_fields_style.capitalization = camel_case
+dotnet_naming_symbols.private_fields.required_modifiers = readonly
+
+# File header template
+file_header_template = "This file is part of an F# project."
+
+[*.fsproj]
+indent_size = 2

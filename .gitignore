@@ -1,0 +1,37 @@
+# Ignore build output directories
+bin/
+obj/
+
+# Ignore packages directory
+packages/
+
+# Ignore user-specific files
+*.user
+*.userosscache
+*.suo
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.log
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore compiled files
+*.dll
+*.exe
+*.pdb
+
+# Ignore coverage reports
+coverage/
+*.coverage
+*.coveragexml
+
+# Ignore other common files
+*.DS_Store
+*.lock
+*.cache
+*.config
+*.bak

@@ -14,7 +14,21 @@ world |> GameSystem.register
 let w, h = 30, 30
 
 world.Run<CreateBoard>({ Width = w; Height = h })
-world.Run<RandomizeBoard>(RandomizeBoard())
+//world.Run<RandomizeBoard>(RandomizeBoard())
+
+let makeLWSS (world: Container) =
+    world.Send<ReviveCell>({ Position = { X = 10; Y = 1 } })
+    world.Send<ReviveCell>({ Position = { X = 10; Y = 1 } })
+    world.Send<ReviveCell>({ Position = { X = 10; Y = 2 } })
+    world.Send<ReviveCell>({ Position = { X = 10; Y = 3 } })
+    world.Send<ReviveCell>({ Position = { X = 11; Y = 0 } })
+    world.Send<ReviveCell>({ Position = { X = 11; Y = 3 } })
+    world.Send<ReviveCell>({ Position = { X = 12; Y = 3 } })
+    world.Send<ReviveCell>({ Position = { X = 13; Y = 3 } })
+    world.Send<ReviveCell>({ Position = { X = 14; Y = 0 } })
+    world.Send<ReviveCell>({ Position = { X = 14; Y = 2 } })
+
+world |> makeLWSS
 
 let printGrid (world: Container) =
     let statistics = Board.getStatistics world

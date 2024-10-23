@@ -2,38 +2,56 @@ namespace Console
 
 open Spectre.Console
 
-type Colors =
-    | Black
-    | Gray
-    | Green
+open Game
 
-    member this.ToColor =
-        match this with
-        | Black -> Color.Black
-        | Gray -> Color.Grey11
-        | Green -> Color.Green
-
-type Render(width: int, height: int, bgColor: Colors) =
+type AnsiRenderer(width: int, height: int) =
     let canvas = Canvas(width, height)
-    let mutable initialized = false
 
-    member _.BeginDraw() =
-        if not initialized then
-            System.Console.Clear()
-            initialized <- true
-
-        System.Console.SetCursorPosition(0, 0)
+    do
+        AnsiConsole.Clear()
 
         for i in 0 .. width - 1 do
             for j in 0 .. height - 1 do
-                canvas.SetPixel(i, j, bgColor.ToColor) |> ignore
+                canvas.SetPixel(i, j, Color.Black) |> ignore
 
-        true
-    
-    member _.DrawText(text: string, color: Colors) =
-        AnsiConsole.MarkupLine(text, color.ToColor) |> ignore
+    interface Renderer with
+        member _.Width = width
+        member _.Height = height
 
-    member _.Draw(x, y, color: Colors) =
-        canvas.SetPixel(x, y, color.ToColor) |> ignore
+        member _.BeginDraw() =
+            System.Console.SetCursorPosition(0, 0)
 
-    member _.EndDraw() = AnsiConsole.Write(canvas)
+            true
+
+        member _.EndDraw() = canvas |> AnsiConsole.Write
+
+        member _.DrawCell({ X = x; Y = y }, { IsAlive = isAlive }) =
+            canvas.SetPixel(x, y, if isAlive then Color.Green else Color.Grey11) |> ignore
+
+        member _.DrawStatistics({ Alive = alive; Dead = dead }) =
+            sprintf "[green]Alive: %d[/], [red]Dead: %d[/]" alive dead
+            |> AnsiConsole.MarkupLine
+
+type ConsoleRenderer(width: int, height: int) =
+    let aliveCell = '●'
+    let deadCell = '◌'
+    let statisticsOffset = 1
+
+    do System.Console.Clear()
+
+    interface Renderer with
+        member _.Width = width
+        member _.Height = height
+
+        member _.BeginDraw() =
+            System.Console.SetCursorPosition(0, 0)
+            true
+
+        member _.EndDraw() = ()
+
+        member _.DrawCell({ X = x; Y = y }, { IsAlive = isAlive }) =
+            System.Console.SetCursorPosition(x, y + statisticsOffset)
+            printf "%c" (if isAlive then aliveCell else deadCell)
+
+        member _.DrawStatistics({ Alive = alive; Dead = dead }) =
+            printfn "Alive: %d, Dead: %d" alive dead

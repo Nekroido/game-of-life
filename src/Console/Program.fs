@@ -1,7 +1,7 @@
 ﻿namespace Console
 
 module App =
-    open Spectre.Console
+    open Game
 
     [<EntryPoint>]
     let main args =
@@ -9,6 +9,9 @@ module App =
             args |> Seq.tryItem 0 |> Option.defaultValue "25" |> int,
             args |> Seq.tryItem 1 |> Option.defaultValue "25" |> int
 
-        Game.Run(width, height, true)
+        let renderer = AnsiRenderer(width, height)
+        //let renderer = ConsoleRenderer(width, height)
+
+        Game.Run(renderer, true)
 
         0

@@ -9,8 +9,11 @@ module App =
             args |> Seq.tryItem 0 |> Option.defaultValue "25" |> int,
             args |> Seq.tryItem 1 |> Option.defaultValue "25" |> int
 
-        let renderer = AnsiRenderer(width, height)
-        //let renderer = ConsoleRenderer(width, height)
+        let renderer: Renderer =
+            args |> Seq.exists (fun arg -> arg = "--console")
+            |> function
+            | true -> ConsoleRenderer(width, height)
+            | false -> AnsiRenderer(width, height)
 
         Game.Run(renderer, true, None)
 

@@ -42,13 +42,8 @@ type Game(renderer: Renderer, randomize: bool) =
 
                 renderer.DrawStatistics statistics
 
-                for y in 0 .. renderer.Height - 1 do
-                    for x in 0 .. renderer.Width - 1 do
-                        let cell =
-                            world.Query<Position, Status>()
-                            |> Seq.find (fun r -> r.Value1.X = x && r.Value1.Y = y)
-
-                        renderer.DrawCell(cell.Value1, cell.Value2)
+                world.Query<Position, Status>()
+                |> Seq.iter (fun cell -> renderer.DrawCell(cell.Value1, cell.Value2))
 
                 renderer.EndDraw()
 

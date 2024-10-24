@@ -18,5 +18,5 @@ dotnet tool restore
 To run the game in console use the following command:
 
 ```sh
-dotnet run --project src/Console/Console.fsproj <width> <height>
+dotnet run --project src/Console/Console.fsproj <width=25> <height=25> [<seed>] [--console]
 ```

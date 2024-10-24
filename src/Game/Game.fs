@@ -24,7 +24,7 @@ type Game(renderer: Renderer, randomize: bool, seed: int option) =
         world.Run<CreateBoard>(
             { Width = renderer.Width
               Height = renderer.Height
-              Seed = seed |> Option.map System.Random }
+              Seed = seed }
         )
 
         if randomize then

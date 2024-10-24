@@ -5,7 +5,7 @@ namespace Game
 type Board =
     { Width: int
       Height: int
-      Seed: System.Random option }
+      Seed: CoinFlip }
 
 [<Struct>]
 type Statistics =
@@ -15,7 +15,10 @@ type Statistics =
 
 // Actions
 [<Struct>]
-type CreateBoard = { Width: int; Height: int; Seed: System.Random option }
+type CreateBoard =
+    { Width: int
+      Height: int
+      Seed: int option }
 
 [<Struct>]
 type Update = struct end
@@ -55,11 +58,11 @@ module BoardSystem =
 
     let createBoard (world: Container) =
         world.On<CreateBoard>
-        <| fun ({ Width = w; Height = h }) ->
+        <| fun ({ Width = w; Height = h; Seed = seed }) ->
             world.Set<Board>(
                 { Width = w
                   Height = h
-                  Seed = Some System.Random.Shared }
+                  Seed = CoinFlip(seed |> Option.map uint) }
             )
             |> ignore
 
@@ -76,10 +79,7 @@ module BoardSystem =
 
                 status <-
                     { status with
-                        IsAlive =
-                            board.Seed
-                            |> Option.map _.NextBoolean()
-                            |> Option.defaultWith System.Random.Shared.NextBoolean })
+                        IsAlive = board.Seed.flip () })
 
             world.Send<UpdateStatistics>(UpdateStatistics())
 

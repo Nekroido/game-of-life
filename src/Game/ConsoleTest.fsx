@@ -1,3 +1,4 @@
+#r "nuget: FsRandom"
 #r "nuget: Garnet"
 #load "Utils.fs"
 #load "Cell.fs"
@@ -12,14 +13,14 @@ let world = Container()
 world |> GameSystem.register
 
 let w, h = 30, 30
-let seed = 123
+let seed = 431582342
 
 world.Run<CreateBoard>(
     { Width = w
       Height = h
-      Seed = seed |> System.Random |> Some }
+      Seed = Some seed }
 )
-//world.Run<RandomizeBoard>(RandomizeBoard())
+world.Run<RandomizeBoard>(RandomizeBoard())
 
 let makeLWSS (world: Container) =
     world.Send<ReviveCell>({ Position = { X = 10; Y = 1 } })
@@ -33,11 +34,11 @@ let makeLWSS (world: Container) =
     world.Send<ReviveCell>({ Position = { X = 14; Y = 0 } })
     world.Send<ReviveCell>({ Position = { X = 14; Y = 2 } })
 
-world |> makeLWSS
+//world |> makeLWSS
 
 let printGrid (world: Container) =
     let statistics = Board.getStatistics world
-    printfn "Alive: %d, Dead: %d" statistics.Alive statistics.Dead
+    printfn "Alive: %d, Dead: %d, Iteration: %d" statistics.Alive statistics.Dead statistics.Iterations
 
     for y in 0 .. h - 1 do
         for x in 0 .. w - 1 do

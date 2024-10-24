@@ -28,8 +28,16 @@ type AnsiRenderer(width: int, height: int) =
         member _.DrawCell({ X = x; Y = y }, { IsAlive = isAlive }) =
             canvas.SetPixel(x, y, if isAlive then Color.Green else Color.Grey11) |> ignore
 
-        member _.DrawStatistics({ Alive = alive; Dead = dead }) =
-            sprintf "[green]Alive: %d[/], [red]Dead: %d[/]" alive dead
+        member _.DrawStatistics
+            ({ Alive = alive
+               Dead = dead
+               Iterations = iteration })
+            =
+            sprintf
+                "[green]Alive: %d[/], [red]Dead: %d[/], [Grey]Iteration: %d[/]"
+                alive
+                dead
+                iteration
             |> AnsiConsole.MarkupLine
 
 type ConsoleRenderer(width: int, height: int) =
@@ -53,5 +61,9 @@ type ConsoleRenderer(width: int, height: int) =
             System.Console.SetCursorPosition(x, y + statisticsOffset)
             printf "%c" (if isAlive then aliveCell else deadCell)
 
-        member _.DrawStatistics({ Alive = alive; Dead = dead }) =
-            printfn "Alive: %d, Dead: %d" alive dead
+        member _.DrawStatistics
+            ({ Alive = alive
+               Dead = dead
+               Iterations = iteration })
+            =
+            printfn "Alive: %d, Dead: %d, Iteration: %d" alive dead iteration

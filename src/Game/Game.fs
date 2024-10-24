@@ -14,7 +14,7 @@ module GameSystem =
     let register (world: Container) =
         Disposable.Create [ world |> CellSystem.register; world |> BoardSystem.register ]
 
-type Game(renderer: Renderer, randomize: bool) =
+type Game(renderer: Renderer, randomize: bool, seed: int option) =
     let world: Container = Container()
     let cts = new System.Threading.CancellationTokenSource()
 
@@ -23,7 +23,8 @@ type Game(renderer: Renderer, randomize: bool) =
 
         world.Run<CreateBoard>(
             { Width = renderer.Width
-              Height = renderer.Height }
+              Height = renderer.Height
+              Seed = seed |> Option.map System.Random }
         )
 
         if randomize then
@@ -52,6 +53,6 @@ type Game(renderer: Renderer, randomize: bool) =
     interface System.IDisposable with
         member _.Dispose() = world.DestroyAll()
 
-    static member Run(renderer: Renderer, randomize: bool) =
-        use game = new Game(renderer, randomize)
+    static member Run(renderer: Renderer, randomize: bool, seed: int option) =
+        use game = new Game(renderer, randomize, seed)
         game.Run()

@@ -12,8 +12,13 @@ let world = Container()
 world |> GameSystem.register
 
 let w, h = 30, 30
+let seed = 123
 
-world.Run<CreateBoard>({ Width = w; Height = h })
+world.Run<CreateBoard>(
+    { Width = w
+      Height = h
+      Seed = seed |> System.Random |> Some }
+)
 //world.Run<RandomizeBoard>(RandomizeBoard())
 
 let makeLWSS (world: Container) =

@@ -2,14 +2,20 @@ namespace Game
 
 // Components
 [<Struct>]
-type Board = { Width: int; Height: int }
+type Board =
+    { Width: int
+      Height: int
+      Seed: System.Random option }
 
 [<Struct>]
-type Statistics = { Alive: int; Dead: int }
+type Statistics =
+    { Alive: int
+      Dead: int
+      Iterations: int }
 
 // Actions
 [<Struct>]
-type CreateBoard = { Width: int; Height: int }
+type CreateBoard = { Width: int; Height: int; Seed: System.Random option }
 
 [<Struct>]
 type Update = struct end
@@ -39,6 +45,8 @@ type BoardUpdated = { Statistics: Statistics }
 module Board =
     open Garnet.Composition
 
+    let getBoard (world: Container) = world.GetOrDefault<Board>()
+
     let getStatistics (world: Container) = world.GetOrDefault<Statistics>()
 
 // Systems
@@ -48,20 +56,30 @@ module BoardSystem =
     let createBoard (world: Container) =
         world.On<CreateBoard>
         <| fun ({ Width = w; Height = h }) ->
-            world.Set<Board>({ Width = w; Height = h }) |> ignore
+            world.Set<Board>(
+                { Width = w
+                  Height = h
+                  Seed = Some System.Random.Shared }
+            )
+            |> ignore
 
             world.Send<InitializeBoard>(InitializeBoard())
 
     let randomizeBoard (world: Container) =
         world.On<RandomizeBoard>
         <| fun _ ->
+            let board = world.GetOrDefault<Board>()
+
             world.Query<Position, Status>()
             |> Seq.iter (fun r ->
                 let status = &r.Value2
 
                 status <-
                     { status with
-                        IsAlive = System.Random.Shared.NextBoolean() })
+                        IsAlive =
+                            board.Seed
+                            |> Option.map _.NextBoolean()
+                            |> Option.defaultWith System.Random.Shared.NextBoolean })
 
             world.Send<UpdateStatistics>(UpdateStatistics())
 
@@ -80,13 +98,9 @@ module BoardSystem =
             let board = world.GetOrDefault<Board>()
             let w, h = board.Width, board.Height
 
-            for x in 0 .. w - 1 do
-                for y in 0 .. h - 1 do
-                    world
-                        .Create()
-                        .With<Position>({ X = x; Y = y })
-                        .With<Status>({ IsAlive = false })
-                    |> ignore
+            Array2D.init w h (fun _ _ -> world.Create().With<Status>({ IsAlive = false }))
+            |> Array2D.iteri (fun x y e -> e.Add<Position>({ X = x; Y = y }))
+            |> ignore
 
             world.Send<UpdateStatistics>(UpdateStatistics())
 
@@ -94,14 +108,19 @@ module BoardSystem =
         world.On<UpdateStatistics>
         <| fun _ ->
             let statistics =
-                world.Query<Position, Status>()
-                |> Seq.fold
-                    (fun acc r ->
-                        if r.Value2.IsAlive then
-                            { acc with Alive = acc.Alive + 1 }
-                        else
-                            { acc with Dead = acc.Dead + 1 })
-                    { Alive = 0; Dead = 0 }
+                world
+                |> Board.getStatistics
+                |> fun statistics ->
+                    world.Query<Position, Status>()
+                    |> Seq.fold
+                        (fun acc r ->
+                            if r.Value2.IsAlive then
+                                { acc with Alive = acc.Alive + 1 }
+                            else
+                                { acc with Dead = acc.Dead + 1 })
+                        { Alive = 0
+                          Dead = 0
+                          Iterations = statistics.Iterations + 1 }
 
             world.Set<Statistics>(statistics)
             world.Publish<BoardUpdated>({ Statistics = statistics })
@@ -117,7 +136,7 @@ module BoardSystem =
             }
 
     let register (world: Container) =
-        world.SetFactory<Statistics>(fun _ -> { Alive = 0; Dead = 0 })
+        world.SetFactory<Statistics>(fun _ -> { Alive = 0; Dead = 0; Iterations = 0 })
 
         Disposable.Create
             [ world |> createBoard

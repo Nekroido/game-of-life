@@ -12,6 +12,6 @@ module App =
         let renderer = AnsiRenderer(width, height)
         //let renderer = ConsoleRenderer(width, height)
 
-        Game.Run(renderer, true)
+        Game.Run(renderer, true, None)
 
         0

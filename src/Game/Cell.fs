@@ -2,9 +2,17 @@ namespace Game
 
 open Garnet.Composition
 
+[<Struct>]
+type PlaneCoords = { X: int; Y: int }
+
+[<Struct>]
+type HexCoords = { Q: int; R: int }
+
 // Components
 [<Struct>]
-type Position = { X: int; Y: int }
+type Position =
+    | PlaneCoords of plane: PlaneCoords
+    | HexCoords of hex: HexCoords
 
 [<Struct>]
 type Status = { IsAlive: bool }
@@ -28,16 +36,25 @@ type UpdateCells = struct end
 
 // Helpers
 module Cell =
-    let getNeighbors (position: Position) (world: Container) =
-        let directions =
-            [| (-1, -1); (0, -1); (1, -1); (-1, 0); (1, 0); (-1, 1); (0, 1); (1, 1) |]
+    let planeDirections =
+        [| (-1, -1); (0, -1); (1, -1); (-1, 0); (1, 0); (-1, 1); (0, 1); (1, 1) |]
 
+    let hexDirections = [| (-1, 0); (1, 0); (-1, 1); (0, 1); (1, -1); (0, -1) |]
+
+    let getNeighbors (position: Position) (world: Container) =
         let neighbors =
             world.Query<Position, Status>()
             |> Seq.filter (fun r ->
-                directions
-                |> Array.exists (fun (dx, dy) ->
-                    r.Value1.X = position.X + dx && r.Value1.Y = position.Y + dy))
+                match position, r.Value1 with
+                | PlaneCoords p1, PlaneCoords p2 ->
+                    planeDirections
+                    |> Array.exists (fun (dx, dy) ->
+                        p2.X = p1.X + dx && p2.Y = p1.Y + dy)
+                | HexCoords h1, HexCoords h2 ->
+                    hexDirections
+                    |> Array.exists (fun (dq, dr) ->
+                        h2.Q = h1.Q + dq && h2.R = h1.R + dr)
+                | _, _ -> false)
 
         neighbors
 

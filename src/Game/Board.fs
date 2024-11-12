@@ -1,10 +1,15 @@
 namespace Game
 
+type CoordSystem =
+    | Plane
+    | Hex
+
 // Components
 [<Struct>]
 type Board =
     { Width: int
       Height: int
+      CoordSystem: CoordSystem
       Seed: CoinFlip }
 
 [<Struct>]
@@ -18,6 +23,7 @@ type Statistics =
 type CreateBoard =
     { Width: int
       Height: int
+      CoordSystem: CoordSystem
       Seed: int option }
 
 [<Struct>]
@@ -58,10 +64,15 @@ module BoardSystem =
 
     let createBoard (world: Container) =
         world.On<CreateBoard>
-        <| fun ({ Width = w; Height = h; Seed = seed }) ->
+        <| fun
+               ({ Width = w
+                  Height = h
+                  CoordSystem = coordsSystem
+                  Seed = seed }) ->
             world.Set<Board>(
                 { Width = w
                   Height = h
+                  CoordSystem = coordsSystem
                   Seed = CoinFlip(seed |> Option.map uint) }
             )
             |> ignore
@@ -98,9 +109,19 @@ module BoardSystem =
             let board = world.GetOrDefault<Board>()
             let w, h = board.Width, board.Height
 
-            Array2D.init w h (fun _ _ -> world.Create().With<Status>({ IsAlive = false }))
-            |> Array2D.iteri (fun x y e -> e.Add<Position>({ X = x; Y = y }))
-            |> ignore
+            match board.CoordSystem with
+            | Plane ->
+                Array2D.init w h (fun _ _ ->
+                    world.Create().With<Status>({ IsAlive = false }))
+                |> Array2D.iteri (fun x y e ->
+                    e.Add<Position>(PlaneCoords { X = x; Y = y }))
+                |> ignore
+            | Hex ->
+                Array2D.init (w - 1) (h - 1) (fun _ _ ->
+                    world.Create().With<Status>({ IsAlive = false }))
+                |> Array2D.iteri (fun x y e ->
+                    e.Add<Position>(HexCoords { Q = x; R = y }))
+                |> ignore
 
             world.Send<UpdateStatistics>(UpdateStatistics())
 
